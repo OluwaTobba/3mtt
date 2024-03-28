@@ -1,9 +1,10 @@
 const express = require("express");
 const LoginController = require("./controllers/LoginController");
+const RegistrationController = require("./controllers/RegistrationController");
+
 
 const app = express();
 const sequelize = require("./models/sequelize");
-const RegistrationController = require("./controllers/RegistrationController");
 
 app.set("view engine", "ejs");
 
@@ -11,7 +12,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
+app.get("/index", (req, res) => {
   return res.render("index");
 });
 
@@ -21,7 +22,12 @@ app.get("/register", (req, res) => {
 
 app.post("/register", RegistrationController);
 
+app.get("/login", (req, res) => {
+  res.render("login",  { message: "" });
+});
+
 app.post("/login", LoginController);
+
 
 app.delete("/user/:id", (req, res) => {
   return res.send("user deleted");

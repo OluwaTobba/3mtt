@@ -1,20 +1,32 @@
 const validator = require("validator");
+const bcrypt = require('bcrypt');
+const UserModel = require("./../models/user.model");
 
-const LoginController = (req, res) => {
-  const { username, password } = req.body;
+const LoginController = async (req, res) => {
+  const { email, password } = req.body;
 
-  if (!username) return res.render("login", { message: "empty username" });
+  if (!email) return res.render("login", { message: "empty email" });
   if (!password) return res.render("login", { message: "empty password" });
 
-  if (!validator.isEmail(username)) {
-    return res.render("login", { message: "username is not a valid email" });
+  if (!validator.isEmail(email)) {
+    return res.render("login", { message: "email is not a valid email" });
   }
 
-  if (!validator.isStrongPassword(password)) {
-    return res.render("login", { message: "password is not strong" });
+
+  const user = await UserModel.findOne({ where: { email } });
+
+  if (!user) {
+    return res.render("login", { message: "user not found" });
   }
 
-  return res.render("login", { message: "login successfully" });
+  
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordValid) {
+    return res.render("login", { message: "Either email or password is incorrect" });
+  }
+
+  res.redirect("/index");
 };
 
 module.exports = LoginController;

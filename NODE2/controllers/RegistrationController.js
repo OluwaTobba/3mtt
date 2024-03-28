@@ -1,8 +1,11 @@
 const validator = require("validator");
+const bcrypt = require('bcrypt');
 const UserModel = require("./../models/user.model");
 
 const RegistrationController = async (req, res) => {
   const { email, password } = req.body;
+
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   if (!email) return res.render("registration", { message: "empty email" });
   if (!password)
@@ -16,7 +19,7 @@ const RegistrationController = async (req, res) => {
     return res.render("registration", { message: "password is not strong" });
   }
 
-  const user = UserModel.findOne({
+  const user = await UserModel.findOne({
     where: { email },
   });
 
@@ -27,7 +30,8 @@ const RegistrationController = async (req, res) => {
   }
 
   try {
-    await UserModel.create({ email, password });
+    await UserModel.create({ email, password: hashedPassword });
+    return res.redirect("/login");
   } catch (err) {
     console.error(err);
     return res.render("registration", { message: "unexpected error" });
